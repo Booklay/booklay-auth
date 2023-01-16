@@ -1,5 +1,6 @@
 package com.nhnacademy.booklay.booklayauth.dto.response;
 
+import com.nhnacademy.booklay.booklayauth.constant.Roles;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -11,5 +12,5 @@ public class MemberResponse {
 
     private final String password;
 
-    private final String authority;
+    private final Roles authority;
 }

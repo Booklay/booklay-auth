@@ -1,5 +1,7 @@
 package com.nhnacademy.booklay.booklayauth.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nhnacademy.booklay.booklayauth.filter.AuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +15,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import javax.servlet.Filter;
+
 /**
  * Spring Security 기본 설정을 관리합니다.
  *
@@ -23,6 +27,8 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class WebSecurityConfig {
+
+    private final ObjectMapper mapper;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -49,6 +55,8 @@ public class WebSecurityConfig {
         http.headers()
                 .frameOptions().sameOrigin();
 
+        http.addFilter(getAuthenticationFilter());
+
         return http.build();
 
     }
@@ -58,5 +66,13 @@ public class WebSecurityConfig {
         return web -> web.ignoring()
                 .antMatchers("/swagger*", "/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs")
                 .antMatchers("/h2-console/**");
+    }
+
+    private AuthenticationFilter getAuthenticationFilter() throws Exception {
+        AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManager(null), mapper);
+
+        authenticationFilter.setFilterProcessesUrl("/members/login");
+
+        return authenticationFilter;
     }
 }

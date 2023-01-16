@@ -1,0 +1,5 @@
+server:
+  port: 5050
+
+booklay:
+  shop-origin: http://localhost:9090/
