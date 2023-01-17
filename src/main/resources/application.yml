@@ -3,3 +3,7 @@ server:
 
 booklay:
   shop-origin: http://localhost:9090/
+
+token:
+  expiration_time: 86400000
+  secret: booklay_token
