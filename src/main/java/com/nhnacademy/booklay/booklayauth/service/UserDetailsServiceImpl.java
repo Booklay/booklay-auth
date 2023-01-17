@@ -1,5 +1,6 @@
 package com.nhnacademy.booklay.booklayauth.service;
 
+import com.nhnacademy.booklay.booklayauth.domain.CustomMember;
 import com.nhnacademy.booklay.booklayauth.dto.response.MemberResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +35,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException(username);
         }
 
-        return new User(memberResponse.getUserId(), memberResponse.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority(String.valueOf(memberResponse.getAuthority()))));
+        return new CustomMember(memberResponse.getUserId(), memberResponse.getPassword(),
+                Collections.singletonList(memberResponse.getAuthority()));
     }
 }

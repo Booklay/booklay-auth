@@ -1,14 +1,15 @@
 package com.nhnacademy.booklay.booklayauth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nhnacademy.booklay.booklayauth.domain.CustomMember;
 import com.nhnacademy.booklay.booklayauth.dto.reqeust.LoginRequest;
+import com.nhnacademy.booklay.booklayauth.jwt.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -58,15 +59,18 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
 
-         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomMember customMember = ((CustomMember) authResult.getPrincipal());
+        String token = TokenUtils.generateJwtToken(customMember);
 
         log.info("로구인 성공");
-
+        response.addHeader(HttpHeaders.AUTHORIZATION, TokenUtils.BEARER + token);
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-        log.error("로그인 실패");
+
+        log.error("로그인 실패: {}", failed.toString());
+        getFailureHandler().onAuthenticationFailure(request, response, failed);
     }
 }
 

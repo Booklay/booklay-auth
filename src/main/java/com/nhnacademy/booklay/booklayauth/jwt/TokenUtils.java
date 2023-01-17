@@ -1,7 +1,7 @@
 package com.nhnacademy.booklay.booklayauth.jwt;
 
 import com.nhnacademy.booklay.booklayauth.constant.Roles;
-import com.nhnacademy.booklay.booklayauth.dto.Member;
+import com.nhnacademy.booklay.booklayauth.domain.CustomMember;
 import io.jsonwebtoken.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -19,14 +19,15 @@ import java.util.Map;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TokenUtils {
 
-    private static final String secretKey = "BOOKLAY_SECRET_KEY";
+    private static final String SECRET_KEY = "BOOKLAY_SECRET_KEY";
+    public static final String BEARER = "Bearer ";
 
-    public static String generateJwtToken(Member member) {
+    public static String generateJwtToken(CustomMember customMember) {
         JwtBuilder builder = Jwts.builder()
-                .setSubject(member.getEmail())
+                .setSubject(customMember.getUsername())
                 .setHeader(createHeader())
-                .setClaims(createClaims(member))
-                .setExpiration(createExpireDateForOneYear())
+                .setClaims(createClaims(customMember))
+                .setExpiration(createExpireDateForOneMonth())
                 .signWith(SignatureAlgorithm.HS256, createSigningKey());
 
         return builder.compact();
@@ -56,7 +57,7 @@ public class TokenUtils {
         return header.split(" ")[1];
     }
 
-    private static Date createExpireDateForOneYear() {
+    private static Date createExpireDateForOneMonth() {
         // 토큰 만료시간은 30일으로 설정
         Calendar c = Calendar.getInstance();
         c.add(Calendar.DATE, 30);
@@ -73,23 +74,23 @@ public class TokenUtils {
         return header;
     }
 
-    private static Map<String, Object> createClaims(Member member) {
+    private static Map<String, Object> createClaims(CustomMember customMember) {
         // 공개 클레임에 사용자의 이름과 이메일을 설정하여 정보를 조회할 수 있다.
         Map<String, Object> claims = new HashMap<>();
 
-        claims.put("email", member.getEmail());
-        claims.put("role", member.getRole());
+        claims.put("email", customMember.getUsername());
+        claims.put("role", customMember.getAuthorities());
 
         return claims;
     }
 
     private static Key createSigningKey() {
-        byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary(secretKey);
+        byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary(SECRET_KEY);
         return new SecretKeySpec(apiKeySecretBytes, SignatureAlgorithm.HS256.getJcaName());
     }
 
     private static Claims getClaimsFormToken(String token) {
-        return Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(secretKey))
+        return Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(SECRET_KEY))
                 .parseClaimsJws(token).getBody();
     }
 
