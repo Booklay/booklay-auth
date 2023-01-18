@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 public class LoginRequest {
 
     @NotNull
-    private String userId;
+    private String memberId;
 
     @NotNull
     private String password;

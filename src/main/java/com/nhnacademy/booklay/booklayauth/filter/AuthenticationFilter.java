@@ -42,7 +42,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             LoginRequest loginRequest = mapper.readValue(request.getInputStream(), LoginRequest.class);
 
             UsernamePasswordAuthenticationToken token =
-                    new UsernamePasswordAuthenticationToken(loginRequest.getUserId(), loginRequest.getPassword());
+                    new UsernamePasswordAuthenticationToken(loginRequest.getMemberId(), loginRequest.getPassword());
 
             Authentication authentication = getAuthenticationManager().authenticate(token);
 
