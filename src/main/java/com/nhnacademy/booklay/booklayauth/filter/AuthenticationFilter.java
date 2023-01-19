@@ -44,9 +44,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             UsernamePasswordAuthenticationToken token =
                     new UsernamePasswordAuthenticationToken(loginRequest.getMemberId(), loginRequest.getPassword());
 
-            Authentication authentication = getAuthenticationManager().authenticate(token);
-
-            return authentication;
+            return getAuthenticationManager().authenticate(token);
 
         } catch (IOException e) {
             log.error("잘못된 로그인 요청: {}", e.getMessage());

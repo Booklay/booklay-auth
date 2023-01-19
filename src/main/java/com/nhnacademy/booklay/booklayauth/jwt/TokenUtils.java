@@ -78,7 +78,7 @@ public class TokenUtils {
         // 공개 클레임에 사용자의 이름과 이메일을 설정하여 정보를 조회할 수 있다.
         Map<String, Object> claims = new HashMap<>();
 
-        claims.put("email", customMember.getUsername());
+        claims.put("username", customMember.getUsername());
         claims.put("role", customMember.getAuthorities());
 
         return claims;
