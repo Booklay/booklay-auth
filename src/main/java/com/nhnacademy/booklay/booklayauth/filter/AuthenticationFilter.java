@@ -5,6 +5,7 @@ import com.nhnacademy.booklay.booklayauth.domain.CustomMember;
 import com.nhnacademy.booklay.booklayauth.dto.reqeust.LoginRequest;
 import com.nhnacademy.booklay.booklayauth.jwt.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,9 +15,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.UUID;
 
 /**
  * 스프링 시큐리티에 적용할 필터를 관리합니다.
@@ -27,10 +31,12 @@ import java.io.IOException;
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final ObjectMapper mapper;
+    private final RedisTemplate<String, Object> redisTemplate;
 
-    public AuthenticationFilter(AuthenticationManager authenticationManager, ObjectMapper mapper) {
+    public AuthenticationFilter(AuthenticationManager authenticationManager, ObjectMapper mapper, RedisTemplate<String, Object> redisTemplate) {
         super(authenticationManager);
         this.mapper = mapper;
+        this.redisTemplate = redisTemplate;
     }
 
     @Override
@@ -59,9 +65,12 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         CustomMember customMember = ((CustomMember) authResult.getPrincipal());
         String token = TokenUtils.generateJwtToken(customMember);
+        String uuid = UUID.randomUUID().toString();
 
         log.info("로구인 성공");
         response.addHeader(HttpHeaders.AUTHORIZATION, TokenUtils.BEARER + token);
+        TokenUtils.saveJwtToRedis(redisTemplate, token, uuid);
+
     }
 
     @Override

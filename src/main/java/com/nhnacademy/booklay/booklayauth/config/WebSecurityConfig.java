@@ -5,6 +5,7 @@ import com.nhnacademy.booklay.booklayauth.filter.AuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -29,6 +30,7 @@ import javax.servlet.Filter;
 public class WebSecurityConfig {
 
     private final ObjectMapper mapper;
+    private final RedisTemplate redisTemplate;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -69,7 +71,7 @@ public class WebSecurityConfig {
     }
 
     private AuthenticationFilter getAuthenticationFilter() throws Exception {
-        AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManager(null), mapper);
+        AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManager(null), mapper, redisTemplate);
 
         authenticationFilter.setFilterProcessesUrl("/members/login");
 

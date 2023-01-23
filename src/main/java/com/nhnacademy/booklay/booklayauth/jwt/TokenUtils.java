@@ -6,6 +6,7 @@ import io.jsonwebtoken.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
@@ -19,8 +20,9 @@ import java.util.Map;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TokenUtils {
 
-    private static final String SECRET_KEY = "BOOKLAY_SECRET_KEY";
+    public static final String SECRET_KEY = "cQfTjWmZq4t7w!z%C*F-JaNdRgUkXp2r5u8x/A?D(G+KbPeShVmYq3t6v9y$B&E)";
     public static final String BEARER = "Bearer ";
+    public static final String TOKEN = "TOKEN";
 
     public static String generateJwtToken(CustomMember customMember) {
         JwtBuilder builder = Jwts.builder()
@@ -31,6 +33,11 @@ public class TokenUtils {
                 .signWith(SignatureAlgorithm.HS256, createSigningKey());
 
         return builder.compact();
+    }
+
+    public static void saveJwtToRedis(RedisTemplate<String, Object> redisTemplate, String token, String uuid) {
+        redisTemplate.opsForHash()
+                .put(uuid, TOKEN, token);
     }
 
     public static boolean isValidToken(String token) {
@@ -103,4 +110,5 @@ public class TokenUtils {
         Claims claims = getClaimsFormToken(token);
         return (Roles) claims.get("role");
     }
+
 }

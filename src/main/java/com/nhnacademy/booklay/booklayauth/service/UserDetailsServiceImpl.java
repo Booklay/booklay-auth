@@ -27,8 +27,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         MemberResponse memberResponse = restTemplate.getForObject(url + "members/login/?memberId=" + username, MemberResponse.class);
 
-        String encode = passwordEncoder.encode("123456");
-
         if (memberResponse == null) {
             throw new UsernameNotFoundException(username);
         }
