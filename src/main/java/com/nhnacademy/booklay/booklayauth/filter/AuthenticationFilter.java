@@ -33,6 +33,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final ObjectMapper mapper;
     private final RedisTemplate<String, Object> redisTemplate;
 
+    private static final String UUID_HEADER = "X-User-UUID";
     public AuthenticationFilter(AuthenticationManager authenticationManager, ObjectMapper mapper, RedisTemplate<String, Object> redisTemplate) {
         super(authenticationManager);
         this.mapper = mapper;
@@ -69,6 +70,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         log.info("로구인 성공");
         response.addHeader(HttpHeaders.AUTHORIZATION, TokenUtils.BEARER + token);
+        response.addHeader(UUID_HEADER, uuid);
         TokenUtils.saveJwtToRedis(redisTemplate, token, uuid);
 
     }

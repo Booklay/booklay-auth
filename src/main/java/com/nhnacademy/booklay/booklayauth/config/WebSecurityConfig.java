@@ -30,7 +30,7 @@ import javax.servlet.Filter;
 public class WebSecurityConfig {
 
     private final ObjectMapper mapper;
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
