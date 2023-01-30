@@ -3,6 +3,7 @@ package com.nhnacademy.booklay.booklayauth.jwt;
 import com.nhnacademy.booklay.booklayauth.constant.Roles;
 import com.nhnacademy.booklay.booklayauth.domain.CustomMember;
 import io.jsonwebtoken.*;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -87,6 +88,7 @@ public class TokenUtils {
 
         claims.put("username", customMember.getUsername());
         claims.put("role", customMember.getAuthorities());
+        claims.put("uuid", UUID.randomUUID().toString());
 
         return claims;
     }
@@ -109,6 +111,11 @@ public class TokenUtils {
     private static Roles getRoleFromToken(String token) {
         Claims claims = getClaimsFormToken(token);
         return (Roles) claims.get("role");
+    }
+
+    public static String getUUIDFromToken(String token) {
+        Claims claims = getClaimsFormToken(token);
+        return (String) claims.get("uuid");
     }
 
 }

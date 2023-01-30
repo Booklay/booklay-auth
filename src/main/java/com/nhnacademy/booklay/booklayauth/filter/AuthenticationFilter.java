@@ -66,7 +66,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         CustomMember customMember = ((CustomMember) authResult.getPrincipal());
         String token = TokenUtils.generateJwtToken(customMember);
-        String uuid = UUID.randomUUID().toString();
+        String uuid = TokenUtils.getUUIDFromToken(token);
 
         log.info("로구인 성공");
         response.addHeader(HttpHeaders.AUTHORIZATION, TokenUtils.BEARER + token);
