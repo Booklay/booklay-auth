@@ -6,10 +6,10 @@ booklay:
 
   # Redis
   redis:
-    host: 133.186.151.141
+    host: 127.0.0.1
     port: 6379
-    database: 4
-    password: "*N2vya7H@muDTwdNMR!"
+    database: 0
+    password:
 
 token:
   expiration_time: 86400000
