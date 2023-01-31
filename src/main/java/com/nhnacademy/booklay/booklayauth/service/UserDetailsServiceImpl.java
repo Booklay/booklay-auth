@@ -31,7 +31,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException(username);
         }
 
-        return new CustomMember(memberResponse.getUserId(), memberResponse.getPassword(),
+
+        return new CustomMember(memberResponse.getEmail(), memberResponse.getPassword(),
                 Collections.singletonList(memberResponse.getAuthority()));
     }
 }

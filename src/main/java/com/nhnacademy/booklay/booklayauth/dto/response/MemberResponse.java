@@ -13,4 +13,6 @@ public class MemberResponse {
     private final String password;
 
     private final Roles authority;
+
+    private final String email;
 }
