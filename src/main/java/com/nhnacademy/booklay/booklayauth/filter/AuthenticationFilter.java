@@ -71,6 +71,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         log.info("로구인 성공");
         response.addHeader(HttpHeaders.AUTHORIZATION, TokenUtils.BEARER + token);
         response.addHeader(UUID_HEADER, uuid);
+        response.addCookie(new Cookie("SESSION_ID", uuid));
         TokenUtils.saveJwtToRedis(redisTemplate, token, uuid);
 
     }
