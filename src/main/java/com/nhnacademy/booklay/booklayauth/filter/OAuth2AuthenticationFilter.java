@@ -2,6 +2,7 @@ package com.nhnacademy.booklay.booklayauth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhnacademy.booklay.booklayauth.domain.CustomMember;
+import com.nhnacademy.booklay.booklayauth.dto.reqeust.LoginRequest;
 import com.nhnacademy.booklay.booklayauth.dto.reqeust.OAuth2LoginRequest;
 import com.nhnacademy.booklay.booklayauth.jwt.TokenUtils;
 import java.io.IOException;
@@ -45,12 +46,12 @@ public class OAuth2AuthenticationFilter extends UsernamePasswordAuthenticationFi
             log.info("start Oauth2 login");
             log.info("uri = {}", request.getRequestURI());
 
-            OAuth2LoginRequest oAuth2LoginRequest =
-                mapper.readValue(request.getInputStream(), OAuth2LoginRequest.class);
+            LoginRequest loginRequest =
+                mapper.readValue(request.getInputStream(), LoginRequest.class);
 
             UsernamePasswordAuthenticationToken token =
-                new UsernamePasswordAuthenticationToken(oAuth2LoginRequest.getEmail(),
-                                                        oAuth2LoginRequest.getIdentity());
+                new UsernamePasswordAuthenticationToken(loginRequest.getMemberId(),
+                                                        loginRequest.getPassword());
 
             return getAuthenticationManager().authenticate(token);
 

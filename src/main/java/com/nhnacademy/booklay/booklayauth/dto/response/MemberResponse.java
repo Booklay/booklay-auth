@@ -16,5 +16,4 @@ public class MemberResponse {
 
     private final String email;
 
-    private final String identity;
 }

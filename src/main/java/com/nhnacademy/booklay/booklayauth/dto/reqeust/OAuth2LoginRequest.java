@@ -7,7 +7,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class OAuth2LoginRequest {
 
+    private final String identity;
+
     private final String email;
 
-    private final String identity;
 }

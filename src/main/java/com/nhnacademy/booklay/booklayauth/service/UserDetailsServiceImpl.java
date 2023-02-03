@@ -24,14 +24,17 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        if (username.contains("@")) {
+        if (username.contains("GIT_")) {
             MemberResponse memberResponse =
-                restTemplate.getForObject(url + "members/login/email?email=" + username,
+                restTemplate.getForObject(url + "members/login/?memberId=" + username,
                                           MemberResponse.class);
+
 
             isValidMemberResponse(username, memberResponse);
 
-            return new CustomMember(memberResponse.getEmail(), memberResponse.getIdentity(),
+
+
+            return new CustomMember(memberResponse.getUserId(), memberResponse.getPassword(),
                                     Collections.singletonList(memberResponse.getAuthority()));
 
         }
