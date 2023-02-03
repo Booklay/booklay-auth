@@ -2,6 +2,7 @@ package com.nhnacademy.booklay.booklayauth.service;
 
 import com.nhnacademy.booklay.booklayauth.domain.CustomMember;
 import com.nhnacademy.booklay.booklayauth.dto.response.MemberResponse;
+import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,8 +11,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.Collections;
 
 @RequiredArgsConstructor
 @Service
@@ -25,14 +24,32 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        MemberResponse memberResponse = restTemplate.getForObject(url + "members/login/?memberId=" + username, MemberResponse.class);
+        if (username.contains("@")) {
+            MemberResponse memberResponse =
+                restTemplate.getForObject(url + "members/login/email?email=" + username,
+                                          MemberResponse.class);
 
-        if (memberResponse == null) {
-            throw new UsernameNotFoundException(username);
+            isValidMemberResponse(username, memberResponse);
+
+            return new CustomMember(memberResponse.getEmail(), memberResponse.getIdentity(),
+                                    Collections.singletonList(memberResponse.getAuthority()));
+
         }
+
+        MemberResponse memberResponse =
+            restTemplate.getForObject(url + "members/login/?memberId=" + username,
+                                      MemberResponse.class);
+
+        isValidMemberResponse(username, memberResponse);
 
 
         return new CustomMember(memberResponse.getEmail(), memberResponse.getPassword(),
-                Collections.singletonList(memberResponse.getAuthority()));
+                                Collections.singletonList(memberResponse.getAuthority()));
+    }
+
+    private static void isValidMemberResponse(String username, MemberResponse memberResponse) {
+        if (memberResponse == null) {
+            throw new UsernameNotFoundException(username);
+        }
     }
 }

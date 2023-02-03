@@ -26,14 +26,23 @@ public class TokenUtils {
     public static final String TOKEN = "TOKEN";
 
     public static String generateJwtToken(CustomMember customMember) {
-        JwtBuilder builder = Jwts.builder()
+        JwtBuilder accessToken = Jwts.builder()
                 .setSubject(customMember.getUsername())
                 .setHeader(createHeader())
                 .setClaims(createClaims(customMember))
-                .setExpiration(createExpireDateForOneMonth())
+                .setExpiration(createExpireDateForOneHour())
                 .signWith(SignatureAlgorithm.HS256, createSigningKey());
 
-        return builder.compact();
+        return accessToken.compact();
+    }
+
+    public static String generateRefreshToken(CustomMember customMember) {
+        JwtBuilder refreshToken = Jwts.builder()
+                                    .setSubject(customMember.getUsername())
+                                    .setExpiration(createExpireDateForOneMonth())
+                                    .signWith(SignatureAlgorithm.HS256, createSigningKey());
+
+        return refreshToken.compact();
     }
 
     public static void saveJwtToRedis(RedisTemplate<String, Object> redisTemplate, String token, String uuid) {
@@ -69,6 +78,12 @@ public class TokenUtils {
         // 토큰 만료시간은 30일으로 설정
         Calendar c = Calendar.getInstance();
         c.add(Calendar.DATE, 30);
+        return c.getTime();
+    }
+
+    private static Date createExpireDateForOneHour() {
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.HOUR, 1);
         return c.getTime();
     }
 

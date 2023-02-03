@@ -15,4 +15,6 @@ public class MemberResponse {
     private final Roles authority;
 
     private final String email;
+
+    private final String identity;
 }
