@@ -118,12 +118,12 @@ public class TokenUtils {
                 .parseClaimsJws(token).getBody();
     }
 
-    private static String getMemberEmailFromToken(String token) {
+    public static String getMemberEmailFromToken(String token) {
         Claims claims = getClaimsFormToken(token);
         return (String) claims.get("email");
     }
 
-    private static Roles getRoleFromToken(String token) {
+    public static Roles getRoleFromToken(String token) {
         Claims claims = getClaimsFormToken(token);
         return (Roles) claims.get("role");
     }

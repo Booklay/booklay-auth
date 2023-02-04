@@ -1,5 +1,7 @@
 package com.nhnacademy.booklay.booklayauth.filter;
 
+import static com.nhnacademy.booklay.booklayauth.filter.FilterUtils.addHeadersWhenAuthenticationSuccess;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhnacademy.booklay.booklayauth.domain.CustomMember;
 import com.nhnacademy.booklay.booklayauth.dto.reqeust.LoginRequest;
@@ -32,7 +34,7 @@ public class FormAuthenticationFilter extends UsernamePasswordAuthenticationFilt
     private final ObjectMapper mapper;
     private final RedisTemplate<String, Object> redisTemplate;
 
-    private static final String UUID_HEADER = "X-User-UUID";
+    private static final String UUID_HEADER = "UUID";
     private static final String REFRESH_TOKEN = "Refresh-Token";
     public FormAuthenticationFilter(AuthenticationManager authenticationManager, ObjectMapper mapper, RedisTemplate<String, Object> redisTemplate) {
         super(authenticationManager);
@@ -75,20 +77,5 @@ public class FormAuthenticationFilter extends UsernamePasswordAuthenticationFilt
         getFailureHandler().onAuthenticationFailure(request, response, failed);
     }
 
-    static void addHeadersWhenAuthenticationSuccess(HttpServletResponse response, Authentication authResult,
-                                                    Logger log, String uuidHeader, String refreshToken2,
-                                                    RedisTemplate<String, Object> redisTemplate) {
-        CustomMember customMember = ((CustomMember) authResult.getPrincipal());
-        String accessToken = TokenUtils.generateJwtToken(customMember);
-        String uuid = TokenUtils.getUUIDFromToken(accessToken);
-        String refreshToken = TokenUtils.generateRefreshToken(customMember);
-
-        log.info("로구인 성공");
-        response.addHeader(HttpHeaders.AUTHORIZATION, TokenUtils.BEARER + accessToken);
-        response.addHeader(uuidHeader, uuid);
-        response.addHeader(refreshToken2, refreshToken);
-        response.addCookie(new Cookie("SESSION_ID", uuid));
-        TokenUtils.saveJwtToRedis(redisTemplate, refreshToken, uuid);
-    }
 }
 

@@ -3,6 +3,7 @@ package com.nhnacademy.booklay.booklayauth.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhnacademy.booklay.booklayauth.filter.FormAuthenticationFilter;
 import com.nhnacademy.booklay.booklayauth.filter.OAuth2AuthenticationFilter;
+import com.nhnacademy.booklay.booklayauth.filter.RefreshAccessTokenFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,9 +28,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class WebSecurityConfig {
-
-    private final ObjectMapper mapper;
-    private final RedisTemplate<String, Object> redisTemplate;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -56,8 +54,9 @@ public class WebSecurityConfig {
         http.headers()
                 .frameOptions().sameOrigin();
 
-        http.addFilter(getAuthenticationFilter())
-            .addFilterBefore(getOAuth2AuthenticationFilter(), FormAuthenticationFilter.class);
+        http.addFilter(getAuthenticationFilter(null, null))
+            .addFilterBefore(getOAuth2AuthenticationFilter(null, null), FormAuthenticationFilter.class)
+            .addFilterBefore(refreshAccessTokenFilter(null, null), OAuth2AuthenticationFilter.class);
 
         return http.build();
 
@@ -70,7 +69,8 @@ public class WebSecurityConfig {
                 .antMatchers("/h2-console/**");
     }
 
-    private FormAuthenticationFilter getAuthenticationFilter() throws Exception {
+    @Bean
+    public FormAuthenticationFilter getAuthenticationFilter(ObjectMapper mapper, RedisTemplate<String, Object> redisTemplate) throws Exception {
         FormAuthenticationFilter
             formAuthenticationFilter = new FormAuthenticationFilter(authenticationManager(null), mapper, redisTemplate);
 
@@ -79,7 +79,8 @@ public class WebSecurityConfig {
         return formAuthenticationFilter;
     }
 
-    private OAuth2AuthenticationFilter getOAuth2AuthenticationFilter() throws Exception {
+    @Bean
+    public OAuth2AuthenticationFilter getOAuth2AuthenticationFilter(ObjectMapper mapper, RedisTemplate<String, Object> redisTemplate) throws Exception {
 
         OAuth2AuthenticationFilter oAuth2AuthenticationFilter =
             new OAuth2AuthenticationFilter(authenticationManager(null), mapper, redisTemplate);
@@ -87,5 +88,10 @@ public class WebSecurityConfig {
         oAuth2AuthenticationFilter.setFilterProcessesUrl("/members/login/oauth2/github");
 
         return oAuth2AuthenticationFilter;
+    }
+
+    @Bean
+    public RefreshAccessTokenFilter refreshAccessTokenFilter(ObjectMapper mapper, RedisTemplate<String,Object> redisTemplate) {
+        return new RefreshAccessTokenFilter(mapper, redisTemplate);
     }
 }
