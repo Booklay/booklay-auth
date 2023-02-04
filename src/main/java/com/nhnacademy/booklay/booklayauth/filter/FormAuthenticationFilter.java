@@ -5,6 +5,7 @@ import com.nhnacademy.booklay.booklayauth.domain.CustomMember;
 import com.nhnacademy.booklay.booklayauth.dto.reqeust.LoginRequest;
 import com.nhnacademy.booklay.booklayauth.jwt.TokenUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -63,17 +64,7 @@ public class FormAuthenticationFilter extends UsernamePasswordAuthenticationFilt
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
 
-        CustomMember customMember = ((CustomMember) authResult.getPrincipal());
-        String accessToken = TokenUtils.generateJwtToken(customMember);
-        String uuid = TokenUtils.getUUIDFromToken(accessToken);
-        String refreshToken = TokenUtils.generateRefreshToken(customMember);
-
-        log.info("로구인 성공");
-        response.addHeader(HttpHeaders.AUTHORIZATION, TokenUtils.BEARER + accessToken);
-        response.addHeader(UUID_HEADER, uuid);
-        response.addHeader(REFRESH_TOKEN, refreshToken);
-        response.addCookie(new Cookie("SESSION_ID", uuid));
-        TokenUtils.saveJwtToRedis(redisTemplate, refreshToken, uuid);
+        addHeadersWhenAuthenticationSuccess(response, authResult, log, UUID_HEADER, REFRESH_TOKEN, redisTemplate);
 
     }
 
@@ -82,6 +73,22 @@ public class FormAuthenticationFilter extends UsernamePasswordAuthenticationFilt
 
         log.error("로그인 실패: {}", failed.toString());
         getFailureHandler().onAuthenticationFailure(request, response, failed);
+    }
+
+    static void addHeadersWhenAuthenticationSuccess(HttpServletResponse response, Authentication authResult,
+                                                    Logger log, String uuidHeader, String refreshToken2,
+                                                    RedisTemplate<String, Object> redisTemplate) {
+        CustomMember customMember = ((CustomMember) authResult.getPrincipal());
+        String accessToken = TokenUtils.generateJwtToken(customMember);
+        String uuid = TokenUtils.getUUIDFromToken(accessToken);
+        String refreshToken = TokenUtils.generateRefreshToken(customMember);
+
+        log.info("로구인 성공");
+        response.addHeader(HttpHeaders.AUTHORIZATION, TokenUtils.BEARER + accessToken);
+        response.addHeader(uuidHeader, uuid);
+        response.addHeader(refreshToken2, refreshToken);
+        response.addCookie(new Cookie("SESSION_ID", uuid));
+        TokenUtils.saveJwtToRedis(redisTemplate, refreshToken, uuid);
     }
 }
 

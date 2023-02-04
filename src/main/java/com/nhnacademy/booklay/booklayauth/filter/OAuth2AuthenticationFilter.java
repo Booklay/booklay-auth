@@ -68,17 +68,8 @@ public class OAuth2AuthenticationFilter extends UsernamePasswordAuthenticationFi
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws
         IOException, ServletException {
 
-        CustomMember customMember = ((CustomMember) authResult.getPrincipal());
-        String accessToken = TokenUtils.generateJwtToken(customMember);
-        String uuid = TokenUtils.getUUIDFromToken(accessToken);
-        String refreshToken = TokenUtils.generateRefreshToken(customMember);
-
-        log.info("로구인 성공");
-        response.addHeader(HttpHeaders.AUTHORIZATION, TokenUtils.BEARER + accessToken);
-        response.addHeader(UUID_HEADER, uuid);
-        response.addHeader(REFRESH_TOKEN, refreshToken);
-        response.addCookie(new Cookie("SESSION_ID", uuid));
-        TokenUtils.saveJwtToRedis(redisTemplate, refreshToken, uuid);
+        FormAuthenticationFilter.addHeadersWhenAuthenticationSuccess(response, authResult, log, UUID_HEADER,
+                                                                     REFRESH_TOKEN, redisTemplate);
 
     }
 

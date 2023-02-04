@@ -9,7 +9,7 @@ public enum Roles {
 
     ROLE_ADMIN("ROLE_ADMIN"),
     ROLE_AUTHOR("ROLE_AUTHOR"),
-    ROLE_MEMBER("ROLE_MEMBER");
+    ROLE_USER("ROLE_USER");
 
     private final String value;
 }
