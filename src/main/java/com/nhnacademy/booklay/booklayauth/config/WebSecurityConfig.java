@@ -1,7 +1,8 @@
 package com.nhnacademy.booklay.booklayauth.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nhnacademy.booklay.booklayauth.filter.AuthenticationFilter;
+import com.nhnacademy.booklay.booklayauth.filter.FormAuthenticationFilter;
+import com.nhnacademy.booklay.booklayauth.filter.OAuth2AuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,8 +16,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
-import javax.servlet.Filter;
 
 /**
  * Spring Security 기본 설정을 관리합니다.
@@ -57,7 +56,8 @@ public class WebSecurityConfig {
         http.headers()
                 .frameOptions().sameOrigin();
 
-        http.addFilter(getAuthenticationFilter());
+        http.addFilter(getAuthenticationFilter())
+            .addFilterBefore(getOAuth2AuthenticationFilter(), FormAuthenticationFilter.class);
 
         return http.build();
 
@@ -70,11 +70,22 @@ public class WebSecurityConfig {
                 .antMatchers("/h2-console/**");
     }
 
-    private AuthenticationFilter getAuthenticationFilter() throws Exception {
-        AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManager(null), mapper, redisTemplate);
+    private FormAuthenticationFilter getAuthenticationFilter() throws Exception {
+        FormAuthenticationFilter
+            formAuthenticationFilter = new FormAuthenticationFilter(authenticationManager(null), mapper, redisTemplate);
 
-        authenticationFilter.setFilterProcessesUrl("/members/login");
+        formAuthenticationFilter.setFilterProcessesUrl("/members/login");
 
-        return authenticationFilter;
+        return formAuthenticationFilter;
+    }
+
+    private OAuth2AuthenticationFilter getOAuth2AuthenticationFilter() throws Exception {
+
+        OAuth2AuthenticationFilter oAuth2AuthenticationFilter =
+            new OAuth2AuthenticationFilter(authenticationManager(null), mapper, redisTemplate);
+
+        oAuth2AuthenticationFilter.setFilterProcessesUrl("/members/login/oauth2/github");
+
+        return oAuth2AuthenticationFilter;
     }
 }
