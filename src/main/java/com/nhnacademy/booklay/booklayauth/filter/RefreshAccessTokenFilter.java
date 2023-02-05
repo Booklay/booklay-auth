@@ -24,11 +24,13 @@ public class RefreshAccessTokenFilter extends OncePerRequestFilter {
 
     private final ObjectMapper mapper;
     private final RedisTemplate<String, Object> redisTemplate;
-    private final static String UUID_HEADER = "UUID";
+    private static final String UUID_HEADER = "UUID";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws ServletException, IOException {
+
+        log.info("Refreshing Access Token uri = {}", request.getRequestURI());
 
         RefreshTokenRequest refreshTokenRequest = mapper.readValue(request.getInputStream(), RefreshTokenRequest.class);
 
@@ -42,7 +44,7 @@ public class RefreshAccessTokenFilter extends OncePerRequestFilter {
 
             String newToken = TokenUtils.generateJwtToken(customMember);
 
-            log.info("로구인 성공");
+            log.info("Refresh Success");
             response.addHeader(HttpHeaders.AUTHORIZATION, TokenUtils.BEARER + accessToken);
 
             String uuidFromToken = TokenUtils.getUUIDFromToken(newToken);

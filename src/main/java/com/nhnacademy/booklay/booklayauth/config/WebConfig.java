@@ -19,9 +19,4 @@ public class WebConfig {
                 .build();
     }
 
-    @Bean
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper();
-    }
-
 }
