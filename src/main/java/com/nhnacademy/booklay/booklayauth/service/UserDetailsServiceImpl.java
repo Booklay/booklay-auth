@@ -1,10 +1,13 @@
 package com.nhnacademy.booklay.booklayauth.service;
 
+import com.nhnacademy.booklay.booklayauth.config.CustomAuthenticationException;
 import com.nhnacademy.booklay.booklayauth.domain.CustomMember;
 import com.nhnacademy.booklay.booklayauth.dto.response.MemberResponse;
 import java.util.Collections;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -39,9 +43,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         }
 
-        MemberResponse memberResponse =
-            restTemplate.getForObject(url + "members/login/?memberId=" + username,
-                                      MemberResponse.class);
+        MemberResponse memberResponse = null;
+        try {
+            memberResponse =
+                restTemplate.getForObject(url + "members/login/?memberId=" + username,
+                                          MemberResponse.class);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new CustomAuthenticationException(e.getMessage());
+        }
 
         isValidMemberResponse(username, memberResponse);
 

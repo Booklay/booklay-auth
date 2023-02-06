@@ -3,6 +3,8 @@ package com.nhnacademy.booklay.booklayauth.jwt;
 import com.nhnacademy.booklay.booklayauth.constant.Roles;
 import com.nhnacademy.booklay.booklayauth.domain.CustomMember;
 import io.jsonwebtoken.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -118,14 +120,18 @@ public class TokenUtils {
                 .parseClaimsJws(token).getBody();
     }
 
-    private static String getMemberEmailFromToken(String token) {
+    public static String getMemberEmailFromToken(String token) {
         Claims claims = getClaimsFormToken(token);
         return (String) claims.get("email");
     }
 
-    private static Roles getRoleFromToken(String token) {
+    public static Roles getRoleFromToken(String token) {
         Claims claims = getClaimsFormToken(token);
-        return (Roles) claims.get("role");
+        var role =
+            (ArrayList<LinkedHashMap<String, String>>) claims.get("role");
+
+        String authority = role.get(0).get("authority");
+        return Roles.valueOf(authority);
     }
 
     public static String getUUIDFromToken(String token) {

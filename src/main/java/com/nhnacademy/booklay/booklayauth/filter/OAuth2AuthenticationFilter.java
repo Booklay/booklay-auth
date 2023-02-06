@@ -1,19 +1,16 @@
 package com.nhnacademy.booklay.booklayauth.filter;
 
+import static com.nhnacademy.booklay.booklayauth.filter.FilterUtils.addHeadersWhenAuthenticationSuccess;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nhnacademy.booklay.booklayauth.domain.CustomMember;
 import com.nhnacademy.booklay.booklayauth.dto.reqeust.LoginRequest;
-import com.nhnacademy.booklay.booklayauth.dto.reqeust.OAuth2LoginRequest;
-import com.nhnacademy.booklay.booklayauth.jwt.TokenUtils;
 import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,7 +23,7 @@ public class OAuth2AuthenticationFilter extends UsernamePasswordAuthenticationFi
     private final ObjectMapper mapper;
     private final RedisTemplate<String, Object> redisTemplate;
 
-    private static final String UUID_HEADER = "X-User-UUID";
+    private static final String UUID_HEADER = "UUID";
     private static final String REFRESH_TOKEN = "Refresh-Token";
 
     public OAuth2AuthenticationFilter(AuthenticationManager authenticationManager,
@@ -68,17 +65,8 @@ public class OAuth2AuthenticationFilter extends UsernamePasswordAuthenticationFi
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws
         IOException, ServletException {
 
-        CustomMember customMember = ((CustomMember) authResult.getPrincipal());
-        String accessToken = TokenUtils.generateJwtToken(customMember);
-        String uuid = TokenUtils.getUUIDFromToken(accessToken);
-        String refreshToken = TokenUtils.generateRefreshToken(customMember);
-
-        log.info("로구인 성공");
-        response.addHeader(HttpHeaders.AUTHORIZATION, TokenUtils.BEARER + accessToken);
-        response.addHeader(UUID_HEADER, uuid);
-        response.addHeader(REFRESH_TOKEN, refreshToken);
-        response.addCookie(new Cookie("SESSION_ID", uuid));
-        TokenUtils.saveJwtToRedis(redisTemplate, refreshToken, uuid);
+        addHeadersWhenAuthenticationSuccess(response, authResult, log, UUID_HEADER,
+                                                                     REFRESH_TOKEN, redisTemplate);
 
     }
 

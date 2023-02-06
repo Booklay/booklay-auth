@@ -3,6 +3,9 @@ package com.nhnacademy.booklay.booklayauth.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhnacademy.booklay.booklayauth.filter.FormAuthenticationFilter;
 import com.nhnacademy.booklay.booklayauth.filter.OAuth2AuthenticationFilter;
+import com.nhnacademy.booklay.booklayauth.filter.RefreshAccessTokenFilter;
+import com.nhnacademy.booklay.booklayauth.handler.CustomAccessDeniedHandler;
+import com.nhnacademy.booklay.booklayauth.handler.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +18,10 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.ExceptionTranslationFilter;
+import org.springframework.security.web.authentication.AuthenticationFilter;
 
 /**
  * Spring Security 기본 설정을 관리합니다.
@@ -27,9 +33,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class WebSecurityConfig {
-
-    private final ObjectMapper mapper;
-    private final RedisTemplate<String, Object> redisTemplate;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -56,8 +59,12 @@ public class WebSecurityConfig {
         http.headers()
                 .frameOptions().sameOrigin();
 
-        http.addFilter(getAuthenticationFilter())
-            .addFilterBefore(getOAuth2AuthenticationFilter(), FormAuthenticationFilter.class);
+        http.addFilterAfter(getAuthenticationFilter(null, null), ExceptionTranslationFilter.class)
+            .addFilterAfter(getOAuth2AuthenticationFilter(null, null), FormAuthenticationFilter.class)
+            .addFilterBefore(refreshAccessTokenFilter(null, null), OAuth2AuthenticationFilter.class);
+
+        http.exceptionHandling()
+            .authenticationEntryPoint(authenticationEntryPoint());
 
         return http.build();
 
@@ -70,7 +77,8 @@ public class WebSecurityConfig {
                 .antMatchers("/h2-console/**");
     }
 
-    private FormAuthenticationFilter getAuthenticationFilter() throws Exception {
+    @Bean
+    public FormAuthenticationFilter getAuthenticationFilter(ObjectMapper mapper, RedisTemplate<String, Object> redisTemplate) throws Exception {
         FormAuthenticationFilter
             formAuthenticationFilter = new FormAuthenticationFilter(authenticationManager(null), mapper, redisTemplate);
 
@@ -79,7 +87,8 @@ public class WebSecurityConfig {
         return formAuthenticationFilter;
     }
 
-    private OAuth2AuthenticationFilter getOAuth2AuthenticationFilter() throws Exception {
+    @Bean
+    public OAuth2AuthenticationFilter getOAuth2AuthenticationFilter(ObjectMapper mapper, RedisTemplate<String, Object> redisTemplate) throws Exception {
 
         OAuth2AuthenticationFilter oAuth2AuthenticationFilter =
             new OAuth2AuthenticationFilter(authenticationManager(null), mapper, redisTemplate);
@@ -87,5 +96,20 @@ public class WebSecurityConfig {
         oAuth2AuthenticationFilter.setFilterProcessesUrl("/members/login/oauth2/github");
 
         return oAuth2AuthenticationFilter;
+    }
+
+    @Bean
+    public RefreshAccessTokenFilter refreshAccessTokenFilter(ObjectMapper mapper, RedisTemplate<String,Object> redisTemplate) {
+        return new RefreshAccessTokenFilter(mapper, redisTemplate);
+    }
+
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return new CustomAuthenticationEntryPoint();
+    }
+
+    @Bean
+    public ExceptionTranslationFilter exceptionTranslationFilter(AuthenticationEntryPoint entryPoint) {
+        return new ExceptionTranslationFilter(entryPoint);
     }
 }
