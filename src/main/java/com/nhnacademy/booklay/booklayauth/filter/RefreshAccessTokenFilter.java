@@ -45,7 +45,7 @@ public class RefreshAccessTokenFilter extends OncePerRequestFilter {
             String newToken = TokenUtils.generateJwtToken(customMember);
 
             log.info("Refresh Success");
-            response.addHeader(HttpHeaders.AUTHORIZATION, TokenUtils.BEARER + accessToken);
+            response.addHeader(HttpHeaders.AUTHORIZATION, TokenUtils.BEARER + newToken);
 
             String uuidFromToken = TokenUtils.getUUIDFromToken(newToken);
             response.addHeader(UUID_HEADER, uuidFromToken);
