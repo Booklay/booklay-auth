@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhnacademy.booklay.booklayauth.filter.FormAuthenticationFilter;
 import com.nhnacademy.booklay.booklayauth.filter.OAuth2AuthenticationFilter;
 import com.nhnacademy.booklay.booklayauth.filter.RefreshAccessTokenFilter;
+import com.nhnacademy.booklay.booklayauth.handler.CustomAccessDeniedHandler;
+import com.nhnacademy.booklay.booklayauth.handler.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +18,10 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.ExceptionTranslationFilter;
+import org.springframework.security.web.authentication.AuthenticationFilter;
 
 /**
  * Spring Security 기본 설정을 관리합니다.
@@ -54,9 +59,12 @@ public class WebSecurityConfig {
         http.headers()
                 .frameOptions().sameOrigin();
 
-        http.addFilter(getAuthenticationFilter(null, null))
-            .addFilterBefore(getOAuth2AuthenticationFilter(null, null), FormAuthenticationFilter.class)
+        http.addFilterAfter(getAuthenticationFilter(null, null), ExceptionTranslationFilter.class)
+            .addFilterAfter(getOAuth2AuthenticationFilter(null, null), FormAuthenticationFilter.class)
             .addFilterBefore(refreshAccessTokenFilter(null, null), OAuth2AuthenticationFilter.class);
+
+        http.exceptionHandling()
+            .authenticationEntryPoint(authenticationEntryPoint());
 
         return http.build();
 
@@ -93,5 +101,15 @@ public class WebSecurityConfig {
     @Bean
     public RefreshAccessTokenFilter refreshAccessTokenFilter(ObjectMapper mapper, RedisTemplate<String,Object> redisTemplate) {
         return new RefreshAccessTokenFilter(mapper, redisTemplate);
+    }
+
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return new CustomAuthenticationEntryPoint();
+    }
+
+    @Bean
+    public ExceptionTranslationFilter exceptionTranslationFilter(AuthenticationEntryPoint entryPoint) {
+        return new ExceptionTranslationFilter(entryPoint);
     }
 }
