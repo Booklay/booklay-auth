@@ -93,7 +93,7 @@ public class WebSecurityConfig {
         OAuth2AuthenticationFilter oAuth2AuthenticationFilter =
             new OAuth2AuthenticationFilter(authenticationManager(null), mapper, redisTemplate);
 
-        oAuth2AuthenticationFilter.setFilterProcessesUrl("/members/login/oauth2/github");
+        oAuth2AuthenticationFilter.setFilterProcessesUrl("/members/login/oauth2/code/github");
 
         return oAuth2AuthenticationFilter;
     }
