@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: booklay-auth
+
+  config:
+    import: "optional:configserver:http://133.186.218.11:8888"
