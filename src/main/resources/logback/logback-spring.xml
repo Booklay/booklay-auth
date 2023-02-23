@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds">
+    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" />
+
+    <springProperty name="PROJECT_PROFILE" source="spring.profiles.active"/>
+    <springProperty name="PROJECT_NAME" source="spring.application.name"/>
+
+    <springProperty name="ROOT_LOG_LEVEL" source="log.level.root"/>
+
+    <timestamp key="DATE_PATTERN" datePattern="yyyy-MM-dd"/>
+    <timestamp key="TIME_PATTERN" datePattern="HH:mm:ss.SSS"/>
+
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
+    <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
+    <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
+
+    <property name="USER_HOME" value="${HOME}/Documents"/>
+    <property name="LOG_PATTERN" value=" ${DATE_PATTERN} ${TIME_PATTERN} [%clr(%5p)] %logger{36} - %msg%n"/>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${USER_HOME}/logs/${PROJECT_NAME}_${PROJECT_PROFILE}/${PROJECT_NAME}_${PROJECT_PROFILE}_${DATE_PATTERN}.log</file>
+
+        <!--로그 출력 포맷-->
+        <encoder>
+            <pattern> ${LOG_PATTERN} </pattern>
+        </encoder>
+
+        <!--롤링 정책-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${USER_HOME}/logs/rollings/${PROJECT_NAME}_${PROJECT_PROFILE}/${PROJECT_NAME}_${PROJECT_PROFILE}_%d{yyyy-MM-dd}_%i.log.zip</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>50MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="logNCrash" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- Logback의 AsyncAppender 옵션 -->
+        <param name="includeCallerData" value="false"/>
+        <param name="queueSize" value="2048"/>
+        <param name="neverBlock" value="true"/>
+        <param name="maxFlushTime" value="60000"/>
+
+        <!-- Log & Crash Logback SDK의 LogNCrashHttpAppender 옵션 -->
+        <appender name="logNCrashHttp" class="com.toast.java.logncrash.logback.LogNCrashHttpAppender">
+            <param name="appKey" value="h98AoVSn5I3rIctz"/>
+            <param name="logSource" value="${PROJECT_PROFILE}"/>
+            <param name="version" value="1.0.0"/>
+            <param name="logType" value="log"/>
+            <param name="debug" value="false"/>
+            <param name="category" value="${PROJECT_NAME}"/>
+            <param name="errorCodeType" value="action"/>
+        </appender>
+    </appender>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern> ${LOG_PATTERN} </pattern>
+        </encoder>
+    </appender>
+
+
+    <springProfile name="dev">
+        <root level="${ROOT_LOG_LEVEL}">
+            <appender-ref ref="STDOUT" />
+            <appender-ref ref="FILE" />
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <root level="${ROOT_LOG_LEVEL}">
+            <appender-ref ref="STDOUT" />
+            <appender-ref ref="logNCrash" />
+            <appender-ref ref="FILE" />
+        </root>
+    </springProfile>
+
+    <!-- 로그백 관련 리소스 해제 -->
+    <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
+</configuration>

@@ -38,7 +38,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 
 
-            return new CustomMember(memberResponse.getUserId(), memberResponse.getPassword(),
+            return new CustomMember(memberResponse.getEmail(), memberResponse.getPassword(),
                                     Collections.singletonList(memberResponse.getAuthority()));
 
         }
