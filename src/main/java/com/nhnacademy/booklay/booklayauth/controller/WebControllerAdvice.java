@@ -12,7 +12,14 @@ public class WebControllerAdvice extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> notFoundExceptionHandler(Exception ex) {
-
+        printLoggingError(ex);
         return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    private void printLoggingError(Exception exception) {
+        log.error("\nError Occurred"
+                + "\nException  : {}"
+                + "\nMessage : {} ",
+            exception.getClass(), exception.getMessage());
     }
 }
