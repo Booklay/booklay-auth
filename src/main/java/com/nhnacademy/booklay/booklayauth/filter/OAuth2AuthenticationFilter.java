@@ -10,21 +10,25 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 public class OAuth2AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final ObjectMapper mapper;
     private final RedisTemplate<String, Object> redisTemplate;
-
     private static final String UUID_HEADER = "UUID";
     private static final String REFRESH_TOKEN = "Refresh-Token";
+
+    @Value("${booklay.shop-origin}")
+    private String url;
 
     public OAuth2AuthenticationFilter(AuthenticationManager authenticationManager,
                                       ObjectMapper mapper,

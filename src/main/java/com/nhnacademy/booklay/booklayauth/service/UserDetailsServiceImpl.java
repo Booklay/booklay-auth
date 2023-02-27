@@ -26,6 +26,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Value("${booklay.shop-origin}")
     private String url;
 
+
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         if (username.contains("GIT_")) {
@@ -33,31 +35,29 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 restTemplate.getForObject(url + "members/login/?memberId=" + username,
                                           MemberResponse.class);
 
-
             isValidMemberResponse(username, memberResponse);
-
-
 
             return new CustomMember(memberResponse.getEmail(), memberResponse.getPassword(),
                                     Collections.singletonList(memberResponse.getAuthority()));
 
         }
 
-        MemberResponse memberResponse = null;
         try {
-            memberResponse =
-                restTemplate.getForObject(url + "members/login/?memberId=" + username,
+            MemberResponse memberResponse = restTemplate.getForObject(url + "members/login/?memberId=" + username,
                                           MemberResponse.class);
+
+            isValidMemberResponse(username, memberResponse);
+
+
+            return new CustomMember(memberResponse.getEmail(), memberResponse.getPassword(),
+                Collections.singletonList(memberResponse.getAuthority()));
+
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new CustomAuthenticationException(e.getMessage());
         }
 
-        isValidMemberResponse(username, memberResponse);
 
-
-        return new CustomMember(memberResponse.getEmail(), memberResponse.getPassword(),
-                                Collections.singletonList(memberResponse.getAuthority()));
     }
 
     private static void isValidMemberResponse(String username, MemberResponse memberResponse) {
