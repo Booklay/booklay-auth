@@ -38,6 +38,9 @@
     </appender>
 
     <appender name="logNCrash" class="ch.qos.logback.classic.AsyncAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
         <!-- Logback의 AsyncAppender 옵션 -->
         <param name="includeCallerData" value="false"/>
         <param name="queueSize" value="2048"/>
